@@ -47,9 +47,11 @@ initializer.object_manager.create_line(x1=0.0, y1=0.0, x2=0.2, y2=0.2, color=(0.
 
 #Di akhir kode jalankan
 glutMainLoop()
+```
 
 
-#Colors Tamplate
+### Membuat dan Mengatur Objek
+```python
 Terdapat penggunaan color tamplate berupa dictionary tuple
 colors = {
         '--Red': (255, 0, 0),
@@ -92,7 +94,7 @@ def main():
     window.object_manager.create_rectangle(750,100,50,100,color=colors['--Maroon'])
     glutMainLoop()
 main()
-
+```
 
 
 Pastikan Anda memiliki berkas README ini dalam direktori proyek Anda agar pengguna lain dapat dengan mudah memahami cara menggunakan `ObjectManager` yang Anda buat. Selain itu, pastikan juga untuk menambahkan detail kontak atau cara berkontribusi jika Anda ingin menerima kontribusi dari pengguna lain.
