@@ -45,9 +45,18 @@ class OpenGLInitializer:
         else:
             glutReshapeWindow(*self.window_size)
             glutPositionWindow(100, 100)
+    
+    def set_modelView(self,x_start=0.0,x_end=1000,y_start=0.0,y_end=1000,z_start=0.0,z_end=1.0):
+        glLoadIdentity()
+        glViewport(0,0,self.window_size[0],self.window_size[1])
+        glMatrixMode(GL_PROJECTION)
+        glLoadIdentity()
+        glOrtho(x_start,x_end,y_start,y_end,z_start,z_end)
+        
 
     def display(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        self.set_modelView()
         self.object_manager.draw_object()
         glutSwapBuffers()
 
@@ -59,7 +68,6 @@ class OpenGLInitializer:
             else:
                 print("Mode Layar Penuh Nonaktif")
             glutPostRedisplay()
-    
 
 # Object Management
 class ObjectManager:
