@@ -48,4 +48,51 @@ initializer.object_manager.create_line(x1=0.0, y1=0.0, x2=0.2, y2=0.2, color=(0.
 #Di akhir kode jalankan
 glutMainLoop()
 
+
+#Colors Tamplate
+Terdapat penggunaan color tamplate berupa dictionary tuple
+colors = {
+        '--Red': (255, 0, 0),
+        '--Green': (0, 255, 0),
+        '--Blue': (0, 0, 255),
+        '--Yellow': (255, 255, 0),
+        '--Cyan': (0, 255, 255),
+        '--Magenta': (255, 0, 255),
+        '--White': (255, 255, 255),
+        '--Black': (0, 0, 0),
+        '--Gray': (128, 128, 128),
+        '--Aqua': (0, 255, 255),
+        '--Lime': (0, 255, 0),
+        '--Navy': (0, 0, 128),
+        '--Fuchsia': (255, 0, 255),
+        '--Olive': (128, 128, 0),
+        '--Teal': (0, 128, 128),
+        '--Maroon': (128, 0, 0),
+    }
+
+#Penggunaannya
+from GL_tools.GL_tools import *
+
+def main():
+    window = OpenGLInitializer(window_size=(1000,1000),window_title="Tugas Nama")
+    window.initialize_window()
+    window.object_manager.create_rectangle(100,100,50,100,color=colors['--Red'])
+    window.object_manager.create_rectangle(150,100,50,100,color=colors['--White'])
+    window.object_manager.create_rectangle(200,100,50,100,color=colors['--Green'])
+    window.object_manager.create_rectangle(250,100,50,100,color=colors['--Blue'])
+    window.object_manager.create_rectangle(300,100,50,100,color=colors['--Yellow'])
+    window.object_manager.create_rectangle(350,100,50,100,color=colors['--Cyan'])
+    window.object_manager.create_rectangle(400,100,50,100,color=colors['--Magenta'])
+    window.object_manager.create_rectangle(450,100,50,100,color=colors['--Aqua'])
+    window.object_manager.create_rectangle(500,100,50,100,color=colors['--Lime'])
+    window.object_manager.create_rectangle(550,100,50,100,color=colors['--Navy'])
+    window.object_manager.create_rectangle(600,100,50,100,color=colors['--Fuchsia'])
+    window.object_manager.create_rectangle(650,100,50,100,color=colors['--Olive'])
+    window.object_manager.create_rectangle(700,100,50,100,color=colors['--Teal'])
+    window.object_manager.create_rectangle(750,100,50,100,color=colors['--Maroon'])
+    glutMainLoop()
+main()
+
+
+
 Pastikan Anda memiliki berkas README ini dalam direktori proyek Anda agar pengguna lain dapat dengan mudah memahami cara menggunakan `ObjectManager` yang Anda buat. Selain itu, pastikan juga untuk menambahkan detail kontak atau cara berkontribusi jika Anda ingin menerima kontribusi dari pengguna lain.
