@@ -95,6 +95,3 @@ def main():
     glutMainLoop()
 main()
 ```
-
-
-Pastikan Anda memiliki berkas README ini dalam direktori proyek Anda agar pengguna lain dapat dengan mudah memahami cara menggunakan `ObjectManager` yang Anda buat. Selain itu, pastikan juga untuk menambahkan detail kontak atau cara berkontribusi jika Anda ingin menerima kontribusi dari pengguna lain.
