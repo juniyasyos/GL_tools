@@ -27,11 +27,17 @@ class OpenGLInitializer:
     """
     Initializes and configures the OpenGL window.
     """
-    def __init__(self, window_size=(1280, 720), window_title="OpenGL Window"):
+    def __init__(self, window_size=(1280, 720), window_title="OpenGL Window",x_start=0.0,x_end=1000,y_start=0.0,y_end=1000,z_start=0.0,z_end=1.0):
         self.window_size = window_size
         self.window_title = window_title
         self.fullscreen = False
         self.object_manager = ObjectManager()
+        self.x_start=x_start
+        self.x_end=x_end
+        self.y_start=y_start
+        self.y_end=y_end
+        self.z_start=z_start
+        self.z_end=z_end
 
     def initialize_window(self):
         """
@@ -66,7 +72,7 @@ class OpenGLInitializer:
             glutReshapeWindow(*self.window_size)
             glutPositionWindow(100, 100)
     
-    def set_modelView(self,x_start=0.0,x_end=1000,y_start=0.0,y_end=1000,z_start=0.0,z_end=1.0):
+    def set_modelView(self):
         """
         set window about transformation or viewport in openGL
         """
@@ -74,7 +80,7 @@ class OpenGLInitializer:
         glViewport(0,0,self.window_size[0],self.window_size[1])
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        glOrtho(x_start,x_end,y_start,y_end,z_start,z_end)
+        glOrtho(self.x_start,self.x_end,self.y_start,self.y_end,self.z_start,self.z_end)
         
 
     def display(self):
@@ -278,7 +284,7 @@ class ObjectManager:
         glColor3f(*color)
         glBegin(GL_TRIANGLE_FAN)
         glVertex2f(x, y)
-        for i in range(370):
+        for i in range(361):
             angle = i * 3.1415926 / 180
             glVertex2f(x + radius * math.cos(angle), y + radius * math.sin(angle))
         glEnd()
