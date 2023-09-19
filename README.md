@@ -95,7 +95,6 @@ def main():
     glutMainLoop()
 main()
 ```
-
 ##Update penggunaan line
 ```python
 from GL_tools.GL_tools import *
