@@ -4,22 +4,22 @@ from OpenGL.GLU import *
 import math
 
 colors = {
-        '--Red': (255, 0, 0),
-        '--Green': (0, 255, 0),
-        '--Blue': (0, 0, 255),
-        '--Yellow': (255, 255, 0),
-        '--Cyan': (0, 255, 255),
-        '--Magenta': (255, 0, 255),
-        '--White': (255, 255, 255),
-        '--Black': (0, 0, 0),
-        '--Gray': (128, 128, 128),
-        '--Aqua': (0, 255, 255),
-        '--Lime': (0, 255, 0),
-        '--Navy': (0, 0, 128),
-        '--Fuchsia': (255, 0, 255),
-        '--Olive': (128, 128, 0),
-        '--Teal': (0, 128, 128),
-        '--Maroon': (128, 0, 0),
+        'Red': (255, 0, 0),
+        'Green': (0, 255, 0),
+        'Blue': (0, 0, 255),
+        'Yellow': (255, 255, 0),
+        'Cyan': (0, 255, 255),
+        'Magenta': (255, 0, 255),
+        'White': (255, 255, 255),
+        'Black': (0, 0, 0),
+        'Gray': (128, 128, 128),
+        'Aqua': (0, 255, 255),
+        'Lime': (0, 255, 0),
+        'Navy': (0, 0, 128),
+        'Fuchsia': (255, 0, 255),
+        'Olive': (128, 128, 0),
+        'Teal': (0, 128, 128),
+        'Maroon': (128, 0, 0),
     }
 
 # Initialization and Window Configuration
@@ -120,7 +120,7 @@ class ObjectManager:
         if obj in self.objects:
             obj["color"] = color
 
-    def create_rectangle(self, x, y, width, height, color=colors['--White']):
+    def create_rectangle(self, x, y, width, height, color=colors['White']):
         """
         Create a rectangle object.
 
@@ -141,7 +141,7 @@ class ObjectManager:
         }
         self.objects.append(obj)
 
-    def create_circle(self, x, y, radius, color=colors['--White']):
+    def create_circle(self, x, y, radius, color=colors['White']):
         """
         Create a circle object.
 
@@ -160,7 +160,7 @@ class ObjectManager:
         }
         self.objects.append(obj)
 
-    def create_triangle(self, x, y, side_length, color=colors['--White']):
+    def create_triangle(self, x, y, side_length, color=colors['White']):
         """
         Create a triangle object.
 
@@ -179,7 +179,7 @@ class ObjectManager:
         }
         self.objects.append(obj)
 
-    def create_point(self, x, y, color=colors['--White']):
+    def create_point(self, x, y, color=colors['White']):
         """
         Create a point object.
 
@@ -196,7 +196,7 @@ class ObjectManager:
         }
         self.objects.append(obj)
 
-    def create_polygon(self, vertices:list, color=colors['--White']):
+    def create_polygon(self, vertices:list, color=colors['White']):
         """
         Create a polygon object.
 
@@ -211,7 +211,7 @@ class ObjectManager:
         }
         self.objects.append(obj)
 
-    def create_line(self, x1=0, y1=0, x2=0, y2=0, length_line=0, degree=0, color=colors['--White']):
+    def create_line(self, x1=0, y1=0, x2=0, y2=0, length_line=0, degree=0, color=colors['White'],lines=[]):
         """
         Create a line object.
 
@@ -230,6 +230,7 @@ class ObjectManager:
             "y1": y1,
             "x2": x2,
             "y2": y2,
+            "n_point":lines,
             "length_line": length_line,
             "degree": degree,
             "color": color
@@ -284,7 +285,7 @@ class ObjectManager:
         glColor3f(*color)
         glBegin(GL_TRIANGLE_FAN)
         glVertex2f(x, y)
-        for i in range(361):
+        for i in range(90):
             angle = i * 3.1415926 / 180
             glVertex2f(x + radius * math.cos(angle), y + radius * math.sin(angle))
         glEnd()
@@ -335,6 +336,7 @@ class ObjectManager:
         """
         Draw a line object.
         """
+        n_point = obj['n_point']
         if "x1" in obj and "y1" in obj and "x2" in obj and "y2" in obj:
             # Case 1: Using start and end points
             x1 = obj["x1"]
@@ -356,6 +358,19 @@ class ObjectManager:
 
         glColor3f(*color)
         glBegin(GL_LINES)
-        glVertex2f(x1, y1)
-        glVertex2f(x2, y2)
+        if n_point!=0:
+            for i in range(len(n_point)):
+                print(i)
+                if i==0:
+                    glVertex2f(x1, y1)
+                    glVertex(*n_point[i])
+
+                if i+1 != len(n_point):
+                    glVertex2f(*n_point[i])
+                    glVertex2f(*n_point[i+1])
+                if i == len(n_point)-1:
+                    print("masuk")
+                    glVertex2f(x2, y2)
+                    glVertex2f(*n_point[i])
+
         glEnd()
