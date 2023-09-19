@@ -95,7 +95,10 @@ def main():
     glutMainLoop()
 main()
 ```
+
+
 ## Update penggunaan line
+kita bisa memberikan titik titik baru di tengah tengah perjalanan dari titik (x1,y1) ke (x2,y2)
 ```python
 from GL_tools.GL_tools import *
 
