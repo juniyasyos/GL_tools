@@ -2,6 +2,7 @@ from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
 import math
+import numpy as np
 
 colors = {
         'Red': (255, 0, 0),
@@ -32,6 +33,7 @@ class OpenGLInitializer:
         self.window_title = window_title
         self.fullscreen = False
         self.object_manager = ObjectManager()
+        self.transform = Transform(self.object_manager.get_Objects())
         self.x_start=x_start
         self.x_end=x_end
         self.y_start=y_start
@@ -48,6 +50,7 @@ class OpenGLInitializer:
         glutInitWindowSize(*self.window_size)
         glutCreateWindow(self.window_title)
         glutDisplayFunc(self.display)
+        self.animation()
 
         # Fungsi keyboard untuk menangani tombol 'f' untuk fullscreen
         glutKeyboardFunc(self.keyboard)
@@ -99,28 +102,61 @@ class OpenGLInitializer:
                 print("Mode Layar Penuh Aktif")
             else:
                 print("Mode Layar Penuh Nonaktif")
-            glutPostRedisplay()
+    def animation(self):
+        self.object_manager.set_objects(self.transform.apply_transf())
+        glutPostRedisplay()
 
 # Object Management
 class ObjectManager:
     """
     Manages objects in the OpenGL scene.
     """
-    def __init__(self):
-        self.objects = []
+    def __init__(self,objects=[]):
+        self.objects = objects
 
-    def set_object_color(self, obj, color):
+    def get_Objects(self):
+        return self.objects
+
+    def remove_objects(self, name="None"):
         """
-        Set the color of an object.
+        Remove objects from the Object Manager.
 
         Args:
-            obj: The object to set the color for.
-            color (tuple): The color in (R, G, B) format.
-        """
-        if obj in self.objects:
-            obj["color"] = color
+            name (str, optional): The name or type of objects to remove. Default is "None" which does nothing.
+                You can use "All" to remove all objects, or specify the type of objects to remove
+                (e.g., "circle", "rectangle", "triangle", "line", "polygon", "point").
 
-    def create_rectangle(self, x, y, width, height, color=colors['White']):
+        Example:
+            # Remove all objects
+            object_manager.remove_objects("All")
+
+            # Remove all circle objects
+            object_manager.remove_objects("circle")
+
+            # Remove all objects of a specific name (user-defined)
+            object_manager.remove_objects("my_object")
+
+            # Do nothing (default behavior)
+            object_manager.remove_objects()
+        """
+        if name == "All":
+            self.objects.clear()
+        else:
+            # Create a list to store objects to be removed
+            to_remove = []
+
+            for obj in self.objects:
+                if name == "None" or obj['type'] == name or obj['name'] == name:
+                    to_remove.append(obj)
+
+            # Remove objects from the to_remove list
+            for obj in to_remove:
+                self.objects.remove(obj)
+
+    def set_objects(self,objects):
+        self.objects=objects
+
+    def create_rectangle(self, x, y, width, height,name="default", color=colors['White']):
         """
         Create a rectangle object.
 
@@ -132,16 +168,18 @@ class ObjectManager:
             color (tuple, optional): Color of the rectangle in RGB format. Default is white (1.0, 1.0, 1.0).
         """
         obj = {
+            "name": name,
             "type": "rectangle",
             "x": x,
             "y": y,
             "width": width,
             "height": height,
+            "point":[(x, y),(x + width, y),(x + width, y + height),(x, y + height)],
             "color": color
         }
         self.objects.append(obj)
-
-    def create_circle(self, x, y, radius, color=colors['White']):
+    
+    def create_circle(self, x, y, radius, name="default", color=colors['White']):
         """
         Create a circle object.
 
@@ -151,16 +189,22 @@ class ObjectManager:
             radius (float): Radius of the circle.
             color (tuple, optional): Color of the circle in RGB format. Default is white (1.0, 1.0, 1.0).
         """
+        poin = []
+        for i in range(361):
+            angle = i * 3.1415926 / 180
+            poin.append((x + radius * math.cos(angle), y + radius * math.sin(angle)))
         obj = {
+            "name": name,
             "type": "circle",
             "x": x,
             "y": y,
             "radius": radius,
+            "point":poin,
             "color": color
         }
         self.objects.append(obj)
 
-    def create_triangle(self, x, y, side_length, color=colors['White']):
+    def create_triangle(self, x, y, side_length, name="default",color=colors['White']):
         """
         Create a triangle object.
 
@@ -170,16 +214,19 @@ class ObjectManager:
             side_length (float): Length of each side of the equilateral triangle.
             color (tuple, optional): Color of the triangle in RGB format. Default is white (1.0, 1.0, 1.0).
         """
+
         obj = {
+            "name": name,
             "type": "triangle",
             "x": x,
             "y": y,
             "side_length": side_length,
+            "point":[(x, y),(x + side_length, y),(x + side_length / 2, y + (side_length * math.sqrt(3)) / 2)],
             "color": color
         }
         self.objects.append(obj)
 
-    def create_point(self, x, y, color=colors['White']):
+    def create_point(self, x, y, name="default",color=colors['White']):
         """
         Create a point object.
 
@@ -189,6 +236,7 @@ class ObjectManager:
             color (tuple, optional): Color of the point in RGB format. Default is white (1.0, 1.0, 1.0).
         """
         obj = {
+            "name": name,
             "type": "point",
             "x": x,
             "y": y,
@@ -196,7 +244,7 @@ class ObjectManager:
         }
         self.objects.append(obj)
 
-    def create_polygon(self, vertices:list, color=colors['White']):
+    def create_polygon(self, vertices:list, name="default", color=colors['White']):
         """
         Create a polygon object.
 
@@ -205,13 +253,14 @@ class ObjectManager:
             color (tuple, optional): Color of the polygon in RGB format. Default is white (1.0, 1.0, 1.0).
         """
         obj = {
+            "name": name,
             "type": "polygon",
-            "vertices": vertices,
+            "point": vertices,
             "color": color
         }
         self.objects.append(obj)
 
-    def create_line(self, x1=0, y1=0, x2=0, y2=0, length_line=0, degree=0, color=colors['White'],lines=[]):
+    def create_line(self, x1=0, y1=0, x2=0, y2=0, length_line=0, degree=0, color=colors['White'],lines=[],name="default",):
         """
         Create a line object.
 
@@ -224,12 +273,25 @@ class ObjectManager:
             degree (float): Rotation angle in degrees (optional).
             color (tuple, optional): Color of the line in RGB format. Default is white (1.0, 1.0, 1.0).
         """
+        point = []
+        if x2 != 0 and y2 != 0:
+            point.append((x1,y1))
+            point.append((x2,y2))
+        else:
+            x2 = x1 + length_line * math.cos(degree * math.pi / 180.0)
+            y2 = y1 + length_line * math.sin(degree * math.pi / 180.0)
+            point.append((x1,y1))
+            for i in lines:
+                point.append(i)
+            point.append((x2,y2))
         obj = {
+            "name": name,
             "type": "line",
             "x1": x1,
             "y1": y1,
             "x2": x2,
             "y2": y2,
+            'point':point,
             "n_point":lines,
             "length_line": length_line,
             "degree": degree,
@@ -259,51 +321,34 @@ class ObjectManager:
         """
         Draw a rectangle object.
         """
-        x = obj["x"]
-        y = obj["y"]
-        width = obj["width"]
-        height = obj["height"]
         color = obj["color"]
 
         glColor3f(*color)
         glBegin(GL_QUADS)
-        glVertex2f(x, y)
-        glVertex2f(x + width, y)
-        glVertex2f(x + width, y + height)
-        glVertex2f(x, y + height)
+        for i in obj['point']:
+            glVertex2f(*i)
         glEnd()
 
     def draw_circle(self, obj):
         """
         Draw a circle object.
         """
-        x = obj["x"]
-        y = obj["y"]
-        radius = obj["radius"]
         color = obj["color"]
-
         glColor3f(*color)
         glBegin(GL_TRIANGLE_FAN)
-        glVertex2f(x, y)
-        for i in range(90):
-            angle = i * 3.1415926 / 180
-            glVertex2f(x + radius * math.cos(angle), y + radius * math.sin(angle))
+        for i in obj['point']:
+            glVertex2f(*i)
         glEnd()
 
     def draw_triangle(self, obj):
         """
         Draw a triangle object.
         """
-        x = obj["x"]
-        y = obj["y"]
-        side_length = obj["side_length"]
         color = obj["color"]
-
         glColor3f(*color)
         glBegin(GL_TRIANGLES)
-        glVertex2f(x, y)
-        glVertex2f(x + side_length, y)
-        glVertex2f(x + side_length / 2, y + (side_length * math.sqrt(3)) / 2)
+        for i in obj['point']:
+            glVertex2f(*i)
         glEnd()
 
     def draw_point(self, obj):
@@ -323,7 +368,7 @@ class ObjectManager:
         """
         Draw a polygon object.
         """
-        vertices = obj["vertices"]
+        vertices = obj["point"]
         color = obj["color"]
 
         glColor3f(*color)
@@ -336,41 +381,109 @@ class ObjectManager:
         """
         Draw a line object.
         """
-        n_point = obj['n_point']
-        if "x1" in obj and "y1" in obj and "x2" in obj and "y2" in obj:
-            # Case 1: Using start and end points
-            x1 = obj["x1"]
-            y1 = obj["y1"]
-            x2 = obj["x2"]
-            y2 = obj["y2"]
-        elif "x" in obj and "y" in obj and "length_line" in obj:
-            # Case 2: Using position (x, y) and length (length_line)
-            x1 = obj["x"]
-            y1 = obj["y"]
-            length_line = obj["length_line"]
-            degree = obj.get("degree", 0.0)
-            x2 = x1 + length_line * math.cos(degree * math.pi / 180.0)
-            y2 = y1 + length_line * math.sin(degree * math.pi / 180.0)
-        else:
-            raise ValueError("Invalid line object. Please provide either start and end points or position and length.")
-
-        color = obj["color"]
-
-        glColor3f(*color)
+        glColor3f(*obj['color'])
         glBegin(GL_LINES)
-        if n_point!=0:
-            for i in range(len(n_point)):
-                print(i)
-                if i==0:
-                    glVertex2f(x1, y1)
-                    glVertex(*n_point[i])
-
-                if i+1 != len(n_point):
-                    glVertex2f(*n_point[i])
-                    glVertex2f(*n_point[i+1])
-                if i == len(n_point)-1:
-                    print("masuk")
-                    glVertex2f(x2, y2)
-                    glVertex2f(*n_point[i])
-
+        for i in obj['point']:
+            glVertex2f(*i)
         glEnd()
+
+# Transform
+class Transform:
+    def __init__(self, Objects=[]):
+        """
+        Initializes a new instance of the Transform class.
+
+        The Transform class provides methods to perform various transformations (translation, scaling, rotation)
+        on objects or shapes in a 2D OpenGL scene.
+
+        Args:
+            Objects (list of dict, optional): A list of objects to be manipulated. Default is an empty list.
+
+        Returns:
+            None
+        """
+        self.Object = Objects
+
+    def translate(self, dx: float, dy: float, name="default"):
+        """
+        Translate an object or shape by a specified displacement.
+
+        Args:
+            dx (float): The displacement along the x-axis.
+            dy (float): The displacement along the y-axis.
+            name (str, optional): The name or type of object to be translated. Default is "default" (all objects).
+
+        Returns:
+            None
+        """
+        new_point = []
+        for obj in range(len(self.Object)):
+            if self.Object[obj]['name'] == name or self.Object[obj]['type'] == name:
+                for i in range(len(self.Object[obj]['point'])):
+                    new_point.append((self.Object[obj]['point'][i][0] + dx,self.Object[obj]['point'][i][1] + dy))
+                self.Object[obj]['point'] = new_point
+
+
+    def scale(self, scale_factor,name="default"):
+        """
+        Scale an object or shape by a specified scaling factor.
+
+        Args:
+            scale_factor (float): The scaling factor.
+
+        Returns:
+            None
+        """
+        new_point = []
+        for obj in range(len(self.Object)):
+            if self.Object[obj]['name'] == name or self.Object[obj]['type'] == name:
+                for i in range(len(self.Object[obj]['point'])):
+                    new_point.append((self.Object[obj]['point'][i][0] * scale_factor,self.Object[obj]['point'][i][1] * scale_factor))
+                self.Object[obj]['point'] = new_point
+
+    def rotate(self, angle_degrees, center_x=0.0, center_y=0.0, name="default"):
+        """
+        Rotate an object or shape by a specified angle (in degrees) around a specified center point.
+
+        Args:
+            angle_degrees (float): The rotation angle in degrees.
+            center_x (float, optional): The x-coordinate of the center of rotation. Default is 0.0.
+            center_y (float, optional): The y-coordinate of the center of rotation. Default is 0.0.
+            name (str): The name of the object to be rotated. Default is "default".
+
+        Returns:
+            None
+        """
+        for obj in range(len(self.Object)):
+            if self.Object[obj]['name'] == name or self.Object[obj]['type'] == name:
+                angle_radians = np.radians(angle_degrees)
+                new_point = []
+                for i in range(len(self.Object[obj]['point'])):
+                    x = self.Object[obj]['point'][i][0] - center_x 
+                    y = self.Object[obj]['point'][i][1] - center_y
+                    
+                    apaIni1 = (x * np.cos(angle_radians) - y * np.sin(angle_radians))
+                    apaIni2 = (x * np.sin(angle_radians) + y * np.cos(angle_radians))
+            
+                    x = apaIni1 + center_x
+                    y = apaIni2 + center_y
+
+                    new_point.append((x,y))
+
+                self.Object[obj]['point'] = new_point
+                
+
+
+                
+    def apply_transf(self):
+        """
+        Returns the list of objects after applying transformations.
+
+        Args:
+            None
+
+        Returns:
+            list of dict: The list of objects after applying transformations.
+        """
+        return self.Object
+    
