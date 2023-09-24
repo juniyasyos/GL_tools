@@ -22,22 +22,21 @@ colors = {
         'Teal': (0, 128, 128),
         'Maroon': (128, 0, 0),
     }
-
 # Initialization and Window Configuration
 class OpenGLInitializer:
     """
     Initializes and configures the OpenGL window.
     """
-    def __init__(self, window_size=(1280, 720), window_title="OpenGL Window",x_start=0.0,x_end=1000,y_start=0.0,y_end=1000,z_start=0.0,z_end=1.0):
+    def __init__(self, window_size=(1280, 720), window_title="OpenGL Window",kiri=-500.0,kanan=500,atas=500,bawah=-500,z_start=0.0,z_end=1.0):
         self.window_size = window_size
         self.window_title = window_title
         self.fullscreen = False
         self.object_manager = ObjectManager()
         self.transform = Transform(self.object_manager.get_Objects())
-        self.x_start=x_start
-        self.x_end=x_end
-        self.y_start=y_start
-        self.y_end=y_end
+        self.kiri=kiri
+        self.kanan=kanan
+        self.atas=atas
+        self.bawah=bawah
         self.z_start=z_start
         self.z_end=z_end
 
@@ -54,6 +53,7 @@ class OpenGLInitializer:
 
         # Fungsi keyboard untuk menangani tombol 'f' untuk fullscreen
         glutKeyboardFunc(self.keyboard)
+        glutIdleFunc(self.animation)
 
     def set_window_properties(self, size, title):
         """
@@ -83,7 +83,7 @@ class OpenGLInitializer:
         glViewport(0,0,self.window_size[0],self.window_size[1])
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        glOrtho(self.x_start,self.x_end,self.y_start,self.y_end,self.z_start,self.z_end)
+        glOrtho(self.kiri,self.kanan,self.atas,self.bawah,self.z_start,self.z_end)
         
 
     def display(self):
@@ -179,7 +179,7 @@ class ObjectManager:
         }
         self.objects.append(obj)
     
-    def create_circle(self, x, y, radius, name="default", color=colors['White']):
+    def create_circle(self, x, y, radius, name="default", color=colors['White'],opsi=1,k=6.276):
         """
         Create a circle object.
 
@@ -190,8 +190,9 @@ class ObjectManager:
             color (tuple, optional): Color of the circle in RGB format. Default is white (1.0, 1.0, 1.0).
         """
         poin = []
-        for i in range(361):
-            angle = i * 3.1415926 / 180
+        dg = int(361*opsi)
+        for i in range(dg):
+            angle = k-i * 3.1415926 / 180
             poin.append((x + radius * math.cos(angle), y + radius * math.sin(angle)))
         obj = {
             "name": name,
@@ -274,7 +275,7 @@ class ObjectManager:
             color (tuple, optional): Color of the line in RGB format. Default is white (1.0, 1.0, 1.0).
         """
         point = []
-        if x2 != 0 and y2 != 0:
+        if x2 != 0 and y2 != 0 and lines==[]:
             point.append((x1,y1))
             point.append((x2,y2))
         else:
@@ -316,7 +317,7 @@ class ObjectManager:
                 self.draw_line(obj)
             elif obj["type"] == "polygon":
                 self.draw_polygon(obj)
-
+                
     def draw_rectangle(self, obj):
         """
         Draw a rectangle object.
@@ -325,8 +326,8 @@ class ObjectManager:
 
         glColor3f(*color)
         glBegin(GL_QUADS)
-        for i in obj['point']:
-            glVertex2f(*i)
+        for i in range(len(obj['point'])):
+            glVertex2f(*obj['point'][i])
         glEnd()
 
     def draw_circle(self, obj):
@@ -336,8 +337,8 @@ class ObjectManager:
         color = obj["color"]
         glColor3f(*color)
         glBegin(GL_TRIANGLE_FAN)
-        for i in obj['point']:
-            glVertex2f(*i)
+        for i in range(len(obj['point'])):
+            glVertex2f(*obj['point'][i])
         glEnd()
 
     def draw_triangle(self, obj):
@@ -347,8 +348,8 @@ class ObjectManager:
         color = obj["color"]
         glColor3f(*color)
         glBegin(GL_TRIANGLES)
-        for i in obj['point']:
-            glVertex2f(*i)
+        for i in range(len(obj['point'])):
+            glVertex2f(*obj['point'][i])
         glEnd()
 
     def draw_point(self, obj):
@@ -383,8 +384,10 @@ class ObjectManager:
         """
         glColor3f(*obj['color'])
         glBegin(GL_LINES)
-        for i in obj['point']:
-            glVertex2f(*i)
+        for i in range(len(obj['point'])):
+            if i+1 != len(obj['point']):
+                glVertex2f(*obj['point'][i])
+                glVertex2f(*obj['point'][i+1])
         glEnd()
 
 # Transform
@@ -416,9 +419,9 @@ class Transform:
         Returns:
             None
         """
-        new_point = []
         for obj in range(len(self.Object)):
-            if self.Object[obj]['name'] == name or self.Object[obj]['type'] == name:
+            new_point = []
+            if self.Object[obj]['name'] in name or self.Object[obj]['type'] == name:
                 for i in range(len(self.Object[obj]['point'])):
                     new_point.append((self.Object[obj]['point'][i][0] + dx,self.Object[obj]['point'][i][1] + dy))
                 self.Object[obj]['point'] = new_point
@@ -434,14 +437,14 @@ class Transform:
         Returns:
             None
         """
-        new_point = []
         for obj in range(len(self.Object)):
-            if self.Object[obj]['name'] == name or self.Object[obj]['type'] == name:
+            new_point = []
+            if self.Object[obj]['name'] in name or self.Object[obj]['type'] == name:
                 for i in range(len(self.Object[obj]['point'])):
                     new_point.append((self.Object[obj]['point'][i][0] * scale_factor,self.Object[obj]['point'][i][1] * scale_factor))
                 self.Object[obj]['point'] = new_point
 
-    def rotate(self, angle_degrees, center_x=0.0, center_y=0.0, name="default"):
+    def rotate(self, angle_degrees, name="default"):
         """
         Rotate an object or shape by a specified angle (in degrees) around a specified center point.
 
@@ -454,23 +457,20 @@ class Transform:
         Returns:
             None
         """
+        pointCenter = 0
         for obj in range(len(self.Object)):
+            new_point = []
             if self.Object[obj]['name'] == name or self.Object[obj]['type'] == name:
                 angle_radians = np.radians(angle_degrees)
-                new_point = []
-                for i in range(len(self.Object[obj]['point'])):
-                    x = self.Object[obj]['point'][i][0] - center_x 
-                    y = self.Object[obj]['point'][i][1] - center_y
-                    
-                    apaIni1 = (x * np.cos(angle_radians) - y * np.sin(angle_radians))
-                    apaIni2 = (x * np.sin(angle_radians) + y * np.cos(angle_radians))
-            
-                    x = apaIni1 + center_x
-                    y = apaIni2 + center_y
-
-                    new_point.append((x,y))
-
+                x_total = 0
+                y_total = 0
+                for x,y in range(len(self.Object[obj]['point'])):
+                    x_total += x                    
+                    y_total += y           
+                mid = (x_total/len(self.Object[obj]['point']),y_total/len(self.Object[obj]['point']))         
+                
                 self.Object[obj]['point'] = new_point
+        pass
                 
 
 
